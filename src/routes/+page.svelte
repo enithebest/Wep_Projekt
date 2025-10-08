@@ -17,7 +17,6 @@
 
 	function handleDrop(to, e) {
 		e.preventDefault();
-
 		const item = Number(e.dataTransfer.getData("item"));
 		const from = e.dataTransfer.getData("from");
 
@@ -46,18 +45,19 @@
 		<section
 			class="h-[350px] w-[100px] bg-white border-2 border-black flex flex-col items-center justify-start p-2"
 			ondragover={handleDragOver}
-			ondrop={(e) => handleDrop(id, e)}>
+			ondrop={(e) => handleDrop(id, e)}
+		>
 			<h2 class="font-bold mb-2">List {id}</h2>
 			{#each items as item (item)}
 				<article
 					class="p-3 bg-gray-400 rounded-md mb-2 cursor-move"
 					draggable="true"
 					ondragstart={(e) => handleDragStart(item, id, e)}
-					animate:flip>
+					animate:flip
+				>
 					{item}
 				</article>
 			{/each}
 		</section>
 	{/each}
 </main>
-
