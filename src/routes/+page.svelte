@@ -41,6 +41,7 @@
 	}
 
 	function createIssue() {
+		if (!newIssue.title) return; // require title
 		const id = crypto.randomUUID ? crypto.randomUUID() : String(Date.now());
 		const created = new Date().toISOString();
 		const issue = { id, ...newIssue, created, lane: 'todo' };
@@ -80,7 +81,7 @@
 		<h1 class="text-2xl font-bold text-gray-900">Kanban Board</h1>
 		<button
 			class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
-			on:click={() => showForm = !showForm}>
+			onclick={() => showForm = !showForm}>
 			+ New Issue
 		</button>
 	</div>
@@ -88,13 +89,10 @@
 
 {#if showForm}
 	<div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-		<form
-			class="bg-white p-6 rounded-xl shadow-xl w-full max-w-md"
-			on:submit|preventDefault={createIssue}>
+		<div class="bg-white p-6 rounded-xl shadow-xl w-full max-w-md">
 			<h2 class="text-lg font-semibold text-gray-900 mb-4">New Issue</h2>
-			
+
 			<input class="w-full border border-gray-300 rounded-lg px-3 py-2 mb-3" placeholder="Title" bind:value={newIssue.title} required>
-			
 			<textarea class="w-full border border-gray-300 rounded-lg px-3 py-2 mb-3 resize-none" placeholder="Description" bind:value={newIssue.description} rows="3"></textarea>
 
 			<div class="grid grid-cols-3 gap-3 mb-4">
@@ -109,9 +107,9 @@
 
 			<div class="flex justify-end gap-3">
 				<button type="button" class="px-4 py-2 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50" on:click={() => showForm = false}>Cancel</button>
-				<button type="submit" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium">Create</button>
+				<button type="button" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium" on:click={createIssue}>Create</button>
 			</div>
-		</form>
+		</div>
 	</div>
 {/if}
 
@@ -125,7 +123,7 @@
 				<div class="flex justify-between items-center mb-4">
 					<h2 class="text-lg font-semibold text-gray-900">{lane.title}</h2>
 				</div>
-				
+
 				{#each items.filter(i => i.lane === lane.id) as issue (issue.id)}
 					<article
 						class="p-4 bg-white rounded-lg cursor-move border-l-4 border-indigo-500 transition-all hover:bg-gray-100"
