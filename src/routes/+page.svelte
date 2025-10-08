@@ -1,61 +1,64 @@
 <script>
 	import { flip } from "svelte/animate";
 
-	let boxA = [1, 2];
-	let boxB = [3];
-	let boxC = [4];
-	let boxD = [];
+	// Define the lanes dynamically
+	const LANES = [
+		{ id: 'todo', title: 'Do' },
+		{ id: 'doing', title: 'Doing' },
+		{ id: 'done', title: 'Done' },
+		{ id: 'archive', title: 'Archive' }
+	];
 
-	function handleDragStart(item, from, e) {
-		e.dataTransfer.setData("item", item);
-		e.dataTransfer.setData("from", from);
+	// A shared list of draggable items with lane property
+	let items = [
+		{ id: 1, title: 'Task 1', lane: 'todo' },
+		{ id: 2, title: 'Task 2', lane: 'todo' },
+		{ id: 3, title: 'Task 3', lane: 'doing' },
+		{ id: 4, title: 'Task 4', lane: 'done' }
+	];
+
+	function handleDragStart(id, fromLane, e) {
+		e.dataTransfer.setData("id", id);
+		e.dataTransfer.setData("from", fromLane);
 	}
 
 	function handleDragOver(e) {
 		e.preventDefault();
 	}
 
-	function handleDrop(to, e) {
+	function handleDrop(toLane, e) {
 		e.preventDefault();
-		const item = Number(e.dataTransfer.getData("item"));
-		const from = e.dataTransfer.getData("from");
+		const id = Number(e.dataTransfer.getData("id"));
+		const fromLane = e.dataTransfer.getData("from");
 
-		if (from === "A") boxA = boxA.filter(i => i !== item);
-		if (from === "B") boxB = boxB.filter(i => i !== item);
-		if (from === "C") boxC = boxC.filter(i => i !== item);
-		if (from === "D") boxD = boxD.filter(i => i !== item);
+		if (fromLane === toLane) return;
 
-		if (to === "A") boxA.push(item);
-		if (to === "B") boxB.push(item);
-		if (to === "C") boxC.push(item);
-		if (to === "D") boxD.push(item);
+		items = items.map(it =>
+			it.id === id ? { ...it, lane: toLane } : it
+		);
 	}
 </script>
 
-<h1 class="text-center text-xl font-semibold mb-4">Drag & Drop – Four Lists</h1>
+<h1 class="text-center text-xl font-semibold mb-4">Drag & Drop –- Dynamic Lanes</h1>
 
-<main class="flex justify-center gap-6 p-8 bg-gray-100 h-[400px]">
-	{#each [
-		{ id: "A", items: boxA },
-		{ id: "B", items: boxB },
-		{ id: "C", items: boxC },
-		{ id: "D", items: boxD }
-	] as { id, items }}
+<main class="flex justify-center gap-6 p-8 bg-gray-100 min-h-[400px]">
+	{#each LANES as lane}
 		<!-- svelte-ignore a11y_no_static_element_interactions -->
 		<section
-			class="h-[350px] w-[100px] bg-white border-2 border-black flex flex-col items-center justify-start p-2"
+			class="h-[350px] w-[150px] bg-white border-2 border-black flex flex-col items-center justify-start p-2"
 			ondragover={handleDragOver}
-			ondrop={(e) => handleDrop(id, e)}
+			ondrop={(e) => handleDrop(lane.id, e)}
 		>
-			<h2 class="font-bold mb-2">List {id}</h2>
-			{#each items as item (item)}
+			<h2 class="font-bold mb-2">{lane.title}</h2>
+
+			{#each items.filter(i => i.lane === lane.id) as item (item.id)}
 				<article
-					class="p-3 bg-gray-400 rounded-md mb-2 cursor-move"
+					class="p-3 bg-gray-400 rounded-md mb-2 cursor-move w-full text-center"
 					draggable="true"
-					ondragstart={(e) => handleDragStart(item, id, e)}
+					ondragstart={(e) => handleDragStart(item.id, lane.id, e)}
 					animate:flip
 				>
-					{item}
+					{item.title}
 				</article>
 			{/each}
 		</section>
