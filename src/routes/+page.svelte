@@ -1,7 +1,6 @@
 <script>
 	import { flip } from "svelte/animate";
 
-	// Define the lanes dynamically
 	const LANES = [
 		{ id: 'todo', title: 'Do' },
 		{ id: 'doing', title: 'Doing' },
@@ -9,13 +8,16 @@
 		{ id: 'archive', title: 'Archive' }
 	];
 
-	// A shared list of draggable items with lane property
-	let items = [
-		{ id: 1, title: 'Task 1', lane: 'todo' },
-		{ id: 2, title: 'Task 2', lane: 'todo' },
-		{ id: 3, title: 'Task 3', lane: 'doing' },
-		{ id: 4, title: 'Task 4', lane: 'done' }
-	];
+	let items = [];
+	let showForm = false;
+
+	let newIssue = {
+		title: '',
+		description: '',
+		dueDate: '',
+		storyPoints: 1,
+		priority: 'Medium'
+	};
 
 	function handleDragStart(id, fromLane, e) {
 		e.dataTransfer.setData("id", id);
@@ -28,39 +30,93 @@
 
 	function handleDrop(toLane, e) {
 		e.preventDefault();
-		const id = Number(e.dataTransfer.getData("id"));
+		const id = e.dataTransfer.getData("id");
 		const fromLane = e.dataTransfer.getData("from");
+		if (!id || fromLane === toLane) return;
 
-		if (fromLane === toLane) return;
+		items = items.map(it => it.id === id ? { ...it, lane: toLane } : it);
+	}
 
-		items = items.map(it =>
-			it.id === id ? { ...it, lane: toLane } : it
-		);
+	function createIssue() {
+		const id = crypto.randomUUID ? crypto.randomUUID() : String(Date.now());
+		const created = new Date().toISOString();
+		const issue = { id, ...newIssue, created, lane: 'todo' };
+		items = [...items, issue];
+		showForm = false;
+		newIssue = {
+			title: '',
+			description: '',
+			dueDate: '',
+			storyPoints: 1,
+			priority: 'Medium'
+		};
 	}
 </script>
 
-<h1 class="text-center text-xl font-semibold mb-4">Drag & Drop –- Dynamic Lanes</h1>
+<header class="bg-white shadow-sm border-b border-gray-200 px-6 py-4">
+	<div class="flex justify-between items-center max-w-7xl mx-auto">
+		<h1 class="text-2xl font-bold text-gray-900">Kanban Board</h1>
+		<button
+			class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+			onclick={() => showForm = !showForm}>
+			+ New Issue
+		</button>
+	</div>
+</header>
 
-<main class="flex justify-center gap-6 p-8 bg-gray-100 min-h-[400px]">
-	{#each LANES as lane}
-		<!-- svelte-ignore a11y_no_static_element_interactions -->
-		<section
-			class="h-[350px] w-[150px] bg-white border-2 border-black flex flex-col items-center justify-start p-2"
-			ondragover={handleDragOver}
-			ondrop={(e) => handleDrop(lane.id, e)}
-		>
-			<h2 class="font-bold mb-2">{lane.title}</h2>
+{#if showForm}
+	<div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+<form
+  class="bg-white p-6 rounded-xl shadow-xl w-full max-w-md"
+  on:submit|preventDefault={createIssue}>
 
-			{#each items.filter(i => i.lane === lane.id) as item (item.id)}
-				<article
-					class="p-3 bg-gray-400 rounded-md mb-2 cursor-move w-full text-center"
-					draggable="true"
-					ondragstart={(e) => handleDragStart(item.id, lane.id, e)}
-					animate:flip
-				>
-					{item.title}
-				</article>
-			{/each}
-		</section>
-	{/each}
+			<h2 class="text-lg font-semibold text-gray-900 mb-4">New Issue</h2>
+			
+			<input class="w-full border border-gray-300 rounded-lg px-3 py-2 mb-3" placeholder="Title" bind:value={newIssue.title} required>
+			
+			<textarea class="w-full border border-gray-300 rounded-lg px-3 py-2 mb-3 resize-none" placeholder="Description" bind:value={newIssue.description} rows="3"></textarea>
+
+			<div class="grid grid-cols-3 gap-3 mb-4">
+				<input type="date" class="border border-gray-300 rounded-lg px-3 py-2" bind:value={newIssue.dueDate}>
+				<input type="number" min="0" class="border border-gray-300 rounded-lg px-3 py-2" bind:value={newIssue.storyPoints}>
+				<select class="border border-gray-300 rounded-lg px-3 py-2" bind:value={newIssue.priority}>
+					<option>Low</option>
+					<option>Medium</option>
+					<option>High</option>
+				</select>
+			</div>
+
+			<div class="flex justify-end gap-3">
+				<button type="button" class="px-4 py-2 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50" on:click={() => showForm = false}>Cancel</button>
+				<button type="submit" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium">Create</button>
+			</div>
+		</form>
+	</div>
+{/if}
+
+<main class="max-w-7xl mx-auto p-6 bg-gray-50 min-h-[70vh]">
+	<div class="flex gap-6 overflow-x-auto pb-4">
+		{#each LANES as lane}
+			<section
+				class="bg-white border border-gray-200 rounded-xl p-4 w-80 flex-shrink-0 shadow-sm hover:shadow-md transition-shadow"
+				ondragover={handleDragOver}
+				ondrop={(e) => handleDrop(lane.id, e)}>
+				<h2 class="text-lg font-semibold text-gray-900 mb-4">{lane.title}</h2>
+				
+				{#each items.filter(i => i.lane === lane.id) as issue (issue.id)}
+					<article
+						class="p-4 bg-white rounded-lg cursor-move border-l-4 border-indigo-500 transition-all hover:bg-gray-100"
+						draggable="true"
+						ondragstart={(e) => handleDragStart(issue.id, lane.id, e)}
+						animate:flip>
+						<h3 class="font-semibold text-gray-900 mb-1">{issue.title}</h3>
+						{#if issue.description}
+							<p class="text-sm text-gray-600 mb-2">{issue.description}</p>
+						{/if}
+						<p class="text-xs text-gray-500">SP: {issue.storyPoints} | Priority: {issue.priority}</p>
+					</article>
+				{/each}
+			</section>
+		{/each}
+	</div>
 </main>
