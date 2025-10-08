@@ -1,6 +1,8 @@
 <script>
 	import { flip } from "svelte/animate";
 
+	const STORAGE_KEY = 'kanban-items-v1';
+
 	const LANES = [
 		{ id: 'todo', title: 'Do' },
 		{ id: 'doing', title: 'Doing' },
@@ -8,7 +10,7 @@
 		{ id: 'archive', title: 'Archive' }
 	];
 
-	let items = [];
+	let items = loadFromStorage();
 	let showForm = false;
 
 	let newIssue = {
@@ -35,6 +37,7 @@
 		if (!id || fromLane === toLane) return;
 
 		items = items.map(it => it.id === id ? { ...it, lane: toLane } : it);
+		saveToStorage();
 	}
 
 	function createIssue() {
@@ -42,6 +45,7 @@
 		const created = new Date().toISOString();
 		const issue = { id, ...newIssue, created, lane: 'todo' };
 		items = [...items, issue];
+		saveToStorage();
 		showForm = false;
 		newIssue = {
 			title: '',
@@ -51,6 +55,24 @@
 			priority: 'Medium'
 		};
 	}
+
+	function saveToStorage() {
+		localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+	}
+
+	function loadFromStorage() {
+		try {
+			const raw = localStorage.getItem(STORAGE_KEY);
+			return raw ? JSON.parse(raw) : [];
+		} catch (e) {
+			return [];
+		}
+	}
+
+	function removeItem(id) {
+		items = items.filter(i => i.id !== id);
+		saveToStorage();
+	}
 </script>
 
 <header class="bg-white shadow-sm border-b border-gray-200 px-6 py-4">
@@ -58,7 +80,7 @@
 		<h1 class="text-2xl font-bold text-gray-900">Kanban Board</h1>
 		<button
 			class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
-			onclick={() => showForm = !showForm}>
+			on:click={() => showForm = !showForm}>
 			+ New Issue
 		</button>
 	</div>
@@ -66,10 +88,9 @@
 
 {#if showForm}
 	<div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-<form
-  class="bg-white p-6 rounded-xl shadow-xl w-full max-w-md"
-  on:submit|preventDefault={createIssue}>
-
+		<form
+			class="bg-white p-6 rounded-xl shadow-xl w-full max-w-md"
+			on:submit|preventDefault={createIssue}>
 			<h2 class="text-lg font-semibold text-gray-900 mb-4">New Issue</h2>
 			
 			<input class="w-full border border-gray-300 rounded-lg px-3 py-2 mb-3" placeholder="Title" bind:value={newIssue.title} required>
@@ -101,7 +122,9 @@
 				class="bg-white border border-gray-200 rounded-xl p-4 w-80 flex-shrink-0 shadow-sm hover:shadow-md transition-shadow"
 				ondragover={handleDragOver}
 				ondrop={(e) => handleDrop(lane.id, e)}>
-				<h2 class="text-lg font-semibold text-gray-900 mb-4">{lane.title}</h2>
+				<div class="flex justify-between items-center mb-4">
+					<h2 class="text-lg font-semibold text-gray-900">{lane.title}</h2>
+				</div>
 				
 				{#each items.filter(i => i.lane === lane.id) as issue (issue.id)}
 					<article
@@ -114,6 +137,7 @@
 							<p class="text-sm text-gray-600 mb-2">{issue.description}</p>
 						{/if}
 						<p class="text-xs text-gray-500">SP: {issue.storyPoints} | Priority: {issue.priority}</p>
+						<button class="mt-2 text-xs text-red-600 hover:text-red-800" on:click={() => removeItem(issue.id)}>Delete</button>
 					</article>
 				{/each}
 			</section>
