@@ -1,6 +1,5 @@
 <script>
 	import { flip } from "svelte/animate";
-	import { format, parseISO, isAfter } from "date-fns";
 
 	const STORAGE_KEY = 'kanban-items-v1';
 
@@ -13,6 +12,7 @@
 
 	let items = loadFromStorage();
 	let showForm = false;
+	let editingIssue = null;
 
 	let newIssue = {
 		title: '',
@@ -42,13 +42,26 @@
 	}
 
 	function createIssue() {
-		if (!newIssue.title) return; // require title
+		if (!newIssue.title) return;
 		const id = crypto.randomUUID ? crypto.randomUUID() : String(Date.now());
 		const created = new Date().toISOString();
 		const issue = { id, ...newIssue, created, lane: 'todo' };
 		items = [...items, issue];
 		saveToStorage();
+		closeForm();
+	}
+
+	function openForm(issue = null) {
+		if (issue) {
+			editingIssue = issue;
+			newIssue = { ...issue };
+		}
+		showForm = true;
+	}
+
+	function closeForm() {
 		showForm = false;
+		editingIssue = null;
 		newIssue = {
 			title: '',
 			description: '',
@@ -56,6 +69,12 @@
 			storyPoints: 1,
 			priority: 'Medium'
 		};
+	}
+
+	function updateIssue() {
+		items = items.map(i => i.id === editingIssue.id ? { ...editingIssue, ...newIssue } : i);
+		saveToStorage();
+		closeForm();
 	}
 
 	function saveToStorage() {
@@ -75,25 +94,6 @@
 		items = items.filter(i => i.id !== id);
 		saveToStorage();
 	}
-
-	function formatDate(d) {
-		if (!d) return '—';
-		try {
-			return format(parseISO(d), 'dd.MM.yyyy');
-		} catch {
-			return d;
-		}
-	}
-
-	function isOverdue(issue) {
-		if (!issue.dueDate) return false;
-		try {
-			const due = parseISO(issue.dueDate);
-			return isAfter(new Date(), due) && issue.lane !== 'done' && issue.lane !== 'archive';
-		} catch {
-			return false;
-		}
-	}
 </script>
 
 <header class="bg-white shadow-sm border-b border-gray-200 px-6 py-4">
@@ -101,7 +101,7 @@
 		<h1 class="text-2xl font-bold text-gray-900">Kanban Board</h1>
 		<button
 			class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
-			onclick={() => showForm = !showForm}>
+			onclick={() => openForm()}>
 			+ New Issue
 		</button>
 	</div>
@@ -110,15 +110,26 @@
 {#if showForm}
 	<div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
 		<div class="bg-white p-6 rounded-xl shadow-xl w-full max-w-md">
-			<h2 class="text-lg font-semibold text-gray-900 mb-4">New Issue</h2>
+			<h2 class="text-lg font-semibold text-gray-900 mb-4">
+				{editingIssue ? 'Edit Issue' : 'New Issue'}
+			</h2>
 
-			<input class="w-full border border-gray-300 rounded-lg px-3 py-2 mb-3" placeholder="Title" bind:value={newIssue.title} required>
-			<textarea class="w-full border border-gray-300 rounded-lg px-3 py-2 mb-3 resize-none" placeholder="Description" bind:value={newIssue.description} rows="3"></textarea>
+			<input class="w-full border border-gray-300 rounded-lg px-3 py-2 mb-3"
+				placeholder="Title"
+				bind:value={newIssue.title}
+				required>
+			<textarea class="w-full border border-gray-300 rounded-lg px-3 py-2 mb-3 resize-none"
+				placeholder="Description"
+				bind:value={newIssue.description}
+				rows="3"></textarea>
 
 			<div class="grid grid-cols-3 gap-3 mb-4">
-				<input type="date" class="border border-gray-300 rounded-lg px-3 py-2" bind:value={newIssue.dueDate}>
-				<input type="number" min="0" class="border border-gray-300 rounded-lg px-3 py-2" bind:value={newIssue.storyPoints}>
-				<select class="border border-gray-300 rounded-lg px-3 py-2" bind:value={newIssue.priority}>
+				<input type="date" class="border border-gray-300 rounded-lg px-3 py-2"
+					bind:value={newIssue.dueDate}>
+				<input type="number" min="0" class="border border-gray-300 rounded-lg px-3 py-2"
+					bind:value={newIssue.storyPoints}>
+				<select class="border border-gray-300 rounded-lg px-3 py-2"
+					bind:value={newIssue.priority}>
 					<option>Low</option>
 					<option>Medium</option>
 					<option>High</option>
@@ -126,8 +137,18 @@
 			</div>
 
 			<div class="flex justify-end gap-3">
-				<button type="button" class="px-4 py-2 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50" onclick={() => showForm = false}>Cancel</button>
-				<button type="button" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium" onclick={createIssue}>Create</button>
+				<button type="button"
+					class="px-4 py-2 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50"
+					onclick={closeForm}>Cancel</button>
+				{#if editingIssue}
+					<button type="button"
+						class="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-lg font-medium"
+						onclick={updateIssue}>Update</button>
+				{:else}
+					<button type="button"
+						class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium"
+						onclick={createIssue}>Create</button>
+				{/if}
 			</div>
 		</div>
 	</div>
@@ -148,31 +169,21 @@
 
 				{#each items.filter(i => i.lane === lane.id) as issue (issue.id)}
 					<article
-						class="p-4 rounded-lg cursor-move border-l-4 transition-all hover:bg-gray-100"
-						class:border-red-500={isOverdue(issue)}
-						class:bg-red-50={isOverdue(issue)}
-						class:border-indigo-500={!isOverdue(issue)}
-						class:bg-white={!isOverdue(issue)}
+						class="p-4 bg-white rounded-lg cursor-pointer border-l-4 border-indigo-500 transition-all hover:bg-gray-100"
 						draggable="true"
+						onclick={() => openForm(issue)}
 						ondragstart={(e) => handleDragStart(issue.id, lane.id, e)}
 						animate:flip>
 						<h3 class="font-semibold text-gray-900 mb-1">{issue.title}</h3>
-
 						{#if issue.description}
-							<p class="text-sm text-gray-600 mb-2">{issue.description}</p>
+							<p class="text-sm text-gray-600 mb-2 line-clamp-2">{issue.description}</p>
 						{/if}
-
-						<div class="text-xs text-gray-500 space-y-1">
-							<p>Created: {formatDate(issue.created)}</p>
-							{#if issue.dueDate}
-								<p class={isOverdue(issue) ? 'text-red-600 font-medium' : ''}>Due: {formatDate(issue.dueDate)}</p>
-							{/if}
-							<p>SP: {issue.storyPoints} | Priority: {issue.priority}</p>
-						</div>
-
-						<button class="mt-2 text-xs text-red-600 hover:text-red-800" onclick={() => removeItem(issue.id)}>Delete</button>
+						<p class="text-xs text-gray-500">SP: {issue.storyPoints} | Priority: {issue.priority}</p>
+						<button class="mt-2 text-xs text-red-600 hover:text-red-800"
+							onclick|stopPropagation={() => removeItem(issue.id)}>Delete</button>
 					</article>
 				{/each}
+				
 			</section>
 		{/each}
 	</div>
