@@ -27,28 +27,35 @@
   }
 
   $: if (open && dialogEl) {
+    console.log('IssueDialog: Opening dialog');
     dialogEl.showModal();
   } else if (dialogEl) {
+    console.log('IssueDialog: Closing dialog');
     dialogEl.close();
   }
 
   function close() {
+    console.log('IssueDialog: close triggered');
     dispatch('close');
   }
 
   function submitCreate() {
+    console.log('IssueDialog: submitCreate triggered', form);
     dispatch('create', { ...form });
     close();
   }
 
   function submitUpdate() {
+    console.log('IssueDialog: submitUpdate triggered', form);
     dispatch('update', { ...form });
     close();
   }
 
   onMount(() => {
+    console.log('IssueDialog: Mounted');
     return () => {
       if (dialogEl) dialogEl.close();
+      console.log('IssueDialog: Unmounted');
     };
   });
 </script>
