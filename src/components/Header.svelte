@@ -1,10 +1,12 @@
 <script>
   import { onMount, createEventDispatcher } from 'svelte';
+
   export let onNew = () => {};
   export let onExportCSV = () => {};
   const dispatch = createEventDispatcher();
 
   let country = 'Unknown';
+
   onMount(async () => {
     try {
       const r = await fetch('https://ipapi.co/json/');
@@ -21,6 +23,7 @@
     dispatch('new');
     onNew();
   }
+
   function handleExportCSV() {
     dispatch('exportcsv');
     onExportCSV();
@@ -31,9 +34,19 @@
   <div class="max-w-7xl mx-auto flex justify-between items-center">
     <h1 class="text-2xl font-bold">Kanban Board</h1>
     <div class="flex gap-2 items-center">
-      <div class="text-sm text-gray-600">🌍 {country}</div>
-      <button class="px-3 py-1 bg-indigo-600 text-white rounded" onclick={handleNew}>+ New Issue</button>
-      <button class="px-3 py-1 border rounded" onclick={handleExportCSV}>Export CSV</button>
+      <div class="text-sm text-gray-600" aria-label={`Country: ${country}`}>🌍 {country}</div>
+      <button
+        class="px-3 py-1 bg-indigo-600 text-white rounded hover:bg-indigo-700"
+        onclick={handleNew}
+      >
+        + New Issue
+      </button>
+      <button
+        class="px-3 py-1 border rounded hover:bg-gray-100"
+        onclick={handleExportCSV}
+      >
+        Export CSV
+      </button>
     </div>
   </div>
 </header>
