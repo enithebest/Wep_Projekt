@@ -20,11 +20,13 @@
   });
 
   function handleNew() {
+    console.log('Header: handleNew triggered');
     dispatch('new');
-    onNew();
+    onNew(); // Directly call the prop as a fallback
   }
 
   function handleExportCSV() {
+    console.log('Header: handleExportCSV triggered');
     dispatch('exportcsv');
     onExportCSV();
   }

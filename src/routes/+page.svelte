@@ -163,12 +163,13 @@
     }
   }
 
-  
+
   async function notify(message) {
     if (!('Notification' in window)) return;
     if (Notification.permission === 'granted') {
       new Notification(message);
       return;
+      
     }
     if (Notification.permission !== 'denied') {
       const perm = await Notification.requestPermission();
