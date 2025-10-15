@@ -3,10 +3,9 @@
   import Lane from '../components/Lane.svelte';
   import IssueDialog from '../components/IssueDialog.svelte';
   import { onMount } from 'svelte';
-  import { v4 as uuidv4 } from 'uuid'; // install uuid: npm i uuid
+  import { v4 as uuidv4 } from 'uuid';
   import { formatISO } from 'date-fns';
 
-  // constants: four lanes
   const LANE_ORDER = [
     { id: 'todo', title: 'To Do' },
     { id: 'doing', title: 'Doing' },
@@ -15,13 +14,10 @@
   ];
 
   let lanes = LANE_ORDER;
-  let issues = []; // flat list of issues with .laneId
-
-  // dialog state
+  let issues = [];
   let dialogOpen = false;
   let editingIssue = null;
 
-  // load from localStorage
   const STORAGE_KEY = 'kanban_v1';
   function loadState() {
     try {
@@ -30,24 +26,23 @@
         const parsed = JSON.parse(raw);
         issues = parsed.issues || [];
       }
-    } catch(e) {
+    } catch (e) {
       console.error('load error', e);
       issues = [];
     }
   }
+
   function saveState() {
     localStorage.setItem(STORAGE_KEY, JSON.stringify({ issues }));
   }
 
   onMount(() => {
     loadState();
-    // register service worker for PWA
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('/service-worker.js').catch(console.error);
     }
   });
 
-  // helpers
   function openCreate() {
     editingIssue = null;
     dialogOpen = true;
@@ -71,7 +66,7 @@
 
   function onUpdate(e) {
     const f = e.detail || e;
-    issues = issues.map(i => i.id === f.id ? { ...i, ...f } : i);
+    issues = issues.map(i => (i.id === f.id ? { ...i, ...f } : i));
     saveState();
   }
 
@@ -85,7 +80,6 @@
     saveState();
   }
 
-  // share single issue via Web Share API
   async function onShare(id) {
     const i = issues.find(x => x.id === id);
     if (!i) return;
@@ -97,17 +91,17 @@
         console.warn('share cancelled', err);
       }
     } else {
-      // fallback: copy to clipboard
-      await navigator.clipboard.writeText(text).catch(()=>{});
+      await navigator.clipboard.writeText(text).catch(() => {});
       alert('Share not available — copied to clipboard.');
     }
   }
 
-  // export single issue to ICS (download)
   function exportIssueICS(id) {
     const i = issues.find(x => x.id === id);
     if (!i) return;
-    const dtstart = i.dueDate ? new Date(i.dueDate).toISOString().replace(/[-:]/g,'').split('.')[0] + 'Z' : new Date().toISOString().replace(/[-:]/g,'').split('.')[0] + 'Z';
+    const dtstart = i.dueDate
+      ? new Date(i.dueDate).toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z'
+      : new Date().toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
     const uid = `${i.id}@kanban`;
     const ics = [
       'BEGIN:VCALENDAR',
@@ -115,7 +109,7 @@
       'PRODID:-//KanbanBoard//EN',
       'BEGIN:VEVENT',
       `UID:${uid}`,
-      `DTSTAMP:${new Date().toISOString().replace(/[-:]/g,'').split('.')[0]}Z`,
+      `DTSTAMP:${new Date().toISOString().replace(/[-:]/g, '').split('.')[0]}Z`,
       `DTSTART:${dtstart}`,
       `SUMMARY:${escapeIcs(i.title)}`,
       `DESCRIPTION:${escapeIcs(i.description || '')}`,
@@ -136,10 +130,11 @@
     return str.replace(/\n/g, '\\n').replace(/,/g, '\\,');
   }
 
-  // export all issues to CSV
   function exportCSV() {
-    const headers = ['id','title','description','createdAt','dueDate','storyPoints','priority','laneId'];
-    const rows = issues.map(i => headers.map(h => `"${String(i[h] ?? '').replace(/"/g,'""')}"`).join(','));
+    const headers = ['id', 'title', 'description', 'createdAt', 'dueDate', 'storyPoints', 'priority', 'laneId'];
+    const rows = issues.map(i =>
+      headers.map(h => `"${String(i[h] ?? '').replace(/"/g, '""')}"`).join(',')
+    );
     const csv = [headers.join(','), ...rows].join('\r\n');
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
@@ -150,31 +145,25 @@
     URL.revokeObjectURL(url);
   }
 
-  // dragStart event from IssueCard: nothing needed here unless you want visuals
   function onDragStart(payload) {
-    // payload: { id, event }
-    // we don't need to track any state here
+    // No state tracking needed
   }
 
-  // drop: move the issue's laneId to the target lane
   function onDrop(targetLaneId, e) {
-    // try to read issue id from dataTransfer
     const id = e.dataTransfer.getData('text/issue-id');
     if (!id) return;
     const issue = issues.find(i => i.id === id);
     if (!issue) return;
     const prevLane = issue.laneId;
-    // update
-    issues = issues.map(i => i.id === id ? { ...i, laneId: targetLaneId } : i);
+    issues = issues.map(i => (i.id === id ? { ...i, laneId: targetLaneId } : i));
     saveState();
 
-    // if moved to done, show notification
     if (targetLaneId === 'done' && prevLane !== 'done') {
       notify(`Issue "${issue.title}" moved to Done.`);
     }
   }
 
-  // notifications
+  
   async function notify(message) {
     if (!('Notification' in window)) return;
     if (Notification.permission === 'granted') {
@@ -188,8 +177,7 @@
   }
 </script>
 
-<!-- Layout -->
-<Header on:new={openCreate} on:exportcsv={exportCSV} />
+<Header onnew={openCreate} onexportcsv={exportCSV} />
 
 <main class="p-6 overflow-auto">
   <div class="flex gap-4">
@@ -197,7 +185,7 @@
       <Lane
         {lane}
         issues={issues.filter(i => i.laneId === lane.id)}
-        onDrop={(e)=> onDrop(lane.id, e.detail ? e.detail.event : e)}
+        onDrop={(e) => onDrop(lane.id, e.detail ? e.detail.event : e)}
         onDragStart={(e) => onDragStart(e.detail || e)}
         onEdit={(e) => onEdit(e.detail)}
         onDelete={(e) => onDelete(e.detail)}
@@ -212,7 +200,17 @@
   bind:open={dialogOpen}
   {editingIssue}
   issue={editingIssue}
-  on:create={(e) => onCreate(e)}
-  on:update={(e) => onUpdate(e)}
-  on:close={() => { dialogOpen = false; editingIssue = null; }}
+  oncreate={(e) => onCreate(e)}
+  onupdate={(e) => onUpdate(e)}
+  onclose={() => {
+    dialogOpen = false;
+    editingIssue = null;
+  }}
 />
+
+<style>
+  :global(body) {
+    margin: 0;
+    font-family: Arial, sans-serif;
+  }
+</style>
