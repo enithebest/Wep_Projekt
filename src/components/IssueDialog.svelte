@@ -61,11 +61,11 @@
     </div>
   </div>
   <div class="flex justify-end gap-2 mt-4">
-    <button on:click={close} class="px-3 py-1 border rounded">Cancel</button>
+    <button onclick={close} class="px-3 py-1 border rounded">Cancel</button>
     {#if issue}
-      <button on:click={submitUpdate} class="px-3 py-1 bg-yellow-500 text-white rounded">Update</button>
+      <button onclick={submitUpdate} class="px-3 py-1 bg-yellow-500 text-white rounded">Update</button>
     {:else}
-      <button on:click={submitCreate} class="px-3 py-1 bg-green-600 text-white rounded">Create</button>
+      <button onclick={submitCreate} class="px-3 py-1 bg-green-600 text-white rounded">Create</button>
     {/if}
   </div>
 </dialog>

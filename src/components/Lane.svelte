@@ -21,6 +21,7 @@
   </div>
 
   {#each issues as issue (issue.id)}
+  
     <IssueCard
       {issue}
       on:edit={() => onEdit(issue)}
