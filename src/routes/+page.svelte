@@ -44,11 +44,13 @@
   });
 
   function openCreate() {
+    console.log('+page: openCreate triggered');
     editingIssue = null;
     dialogOpen = true;
   }
 
   function onCreate(e) {
+    console.log('+page: onCreate triggered', e.detail);
     const f = e.detail || e;
     const newIssue = {
       id: uuidv4(),
@@ -65,22 +67,26 @@
   }
 
   function onUpdate(e) {
+    console.log('+page: onUpdate triggered', e.detail);
     const f = e.detail || e;
     issues = issues.map(i => (i.id === f.id ? { ...i, ...f } : i));
     saveState();
   }
 
   function onEdit(issue) {
+    console.log('+page: onEdit triggered', issue);
     editingIssue = issue;
     dialogOpen = true;
   }
 
   function onDelete(id) {
+    console.log('+page: onDelete triggered', id);
     issues = issues.filter(i => i.id !== id);
     saveState();
   }
 
   async function onShare(id) {
+    console.log('+page: onShare triggered', id);
     const i = issues.find(x => x.id === id);
     if (!i) return;
     const text = `${i.title}\n\n${i.description}\n\nDue: ${i.dueDate || '—'}`;
@@ -97,6 +103,7 @@
   }
 
   function exportIssueICS(id) {
+    console.log('+page: exportIssueICS triggered', id);
     const i = issues.find(x => x.id === id);
     if (!i) return;
     const dtstart = i.dueDate
@@ -131,6 +138,7 @@
   }
 
   function exportCSV() {
+    console.log('+page: exportCSV triggered');
     const headers = ['id', 'title', 'description', 'createdAt', 'dueDate', 'storyPoints', 'priority', 'laneId'];
     const rows = issues.map(i =>
       headers.map(h => `"${String(i[h] ?? '').replace(/"/g, '""')}"`).join(',')
@@ -146,10 +154,11 @@
   }
 
   function onDragStart(payload) {
-    // No state tracking needed
+    console.log('+page: onDragStart triggered', payload);
   }
 
   function onDrop(targetLaneId, e) {
+    console.log('+page: onDrop triggered', targetLaneId, e);
     const id = e.dataTransfer.getData('text/issue-id');
     if (!id) return;
     const issue = issues.find(i => i.id === id);
@@ -163,13 +172,12 @@
     }
   }
 
-
   async function notify(message) {
+    console.log('+page: notify triggered', message);
     if (!('Notification' in window)) return;
     if (Notification.permission === 'granted') {
       new Notification(message);
       return;
-      
     }
     if (Notification.permission !== 'denied') {
       const perm = await Notification.requestPermission();
@@ -204,6 +212,7 @@
   oncreate={(e) => onCreate(e)}
   onupdate={(e) => onUpdate(e)}
   onclose={() => {
+    console.log('+page: IssueDialog onclose triggered');
     dialogOpen = false;
     editingIssue = null;
   }}
