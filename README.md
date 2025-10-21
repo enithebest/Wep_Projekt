@@ -1,38 +1,51 @@
-# sv
+# dragdrop
 
-Everything you need to build a Svelte project, powered by [`sv`](https://github.com/sveltejs/cli).
+A small SvelteKit app that demonstrates drag & drop UI patterns and includes Progressive Web App (PWA) support.
 
-## Creating a project
+## Features
 
-If you're seeing this, you've probably already done this step. Congrats!
+- Built with SvelteKit.
+- Drag & drop UI for organizing items.
+- PWA-ready: includes a web app manifest and a service worker to enable offline caching and installation.
+- Minimal, client-first architecture (static assets served from `static/`).
 
-```sh
-# create a new project in the current directory
-npx sv create
+## Project layout (key files)
 
-# create a new project in my-app
-npx sv create my-app
-```
+- src/app.html — HTML template (includes manifest & theme-color).
+- src/routes/+page.svelte — app entry page (may contain service worker registration).
+- static/manifest.json — web app manifest (icons, name, theme).
+- static/service-worker.js — service worker for caching and offline support.
+- package.json — scripts for dev/build/preview.
 
-## Developing
+## Getting started
 
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
+1. Install dependencies
 
-```sh
-npm run dev
+   npm install
 
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
-```
+2. Run development server
 
-## Building
+   npm run dev
 
-To create a production version of your app:
+3. Build for production
 
-```sh
-npm run build
-```
+   npm run build
 
-You can preview the production build with `npm run preview`.
+4. Preview production build
 
-> To deploy your app, you may need to install an [adapter](https://svelte.dev/docs/kit/adapters) for your target environment.
+   npm run preview
+
+## PWA notes
+
+- Manifest: static/manifest.json — confirm icons and metadata are correct.
+- Service worker: static/service-worker.js — register/replace as needed. After building, verify Service Worker and Manifest in browser DevTools → Application.
+- To test offline behavior: build the app, open in a secure context (localhost or HTTPS), then in DevTools disable network and reload.
+
+## Contributing
+
+- Report issues or open pull requests.
+- Keep changes small and focused; run the dev server to verify UI and PWA behavior.
+
+## License
+
+Add a license (e.g., MIT) or other terms here.
