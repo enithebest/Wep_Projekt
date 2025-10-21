@@ -76,52 +76,75 @@
 
 <dialog
 	bind:this={dialogEl}
-	class="rounded-lg p-6 backdrop:bg-black/50"
-	on:close={handleClose}
+	class="w-full max-w-sm mx-auto rounded-md p-4 bg-white shadow-sm backdrop:bg-black/50 dark:bg-gray-800 dark:shadow-gray-900"
+	onclose={handleClose}
 	aria-labelledby="dialog-title"
 >
-	<h2 id="dialog-title" class="text-lg font-semibold mb-3">
+	<h2
+		id="dialog-title"
+		class="text-lg font-medium text-gray-900 mb-3 dark:text-gray-100"
+	>
 		{issue ? 'Edit Issue' : 'New Issue'}
 	</h2>
 	<div class="space-y-3">
 		<input
 			placeholder="Title"
 			bind:value={form.title}
-			class="w-full border rounded px-3 py-2"
+			class="w-full border border-gray-200 rounded-md px-3 py-1.5 text-sm text-gray-700 focus:outline-none focus:ring-1 focus:ring-blue-400 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 dark:placeholder-gray-400"
 			required
 			aria-label="Issue title"
 		/>
 		<textarea
 			placeholder="Description"
 			bind:value={form.description}
-			rows="4"
-			class="w-full border rounded px-3 py-2"
+			rows="3"
+			class="w-full border border-gray-200 rounded-md px-3 py-1.5 text-sm text-gray-700 focus:outline-none focus:ring-1 focus:ring-blue-400 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 dark:placeholder-gray-400"
 			aria-label="Issue description"
 		></textarea>
 		<div class="grid grid-cols-3 gap-2">
-			<input type="date" bind:value={form.dueDate} class="border rounded px-2 py-1" aria-label="Due date" />
+			<input
+				type="date"
+				bind:value={form.dueDate}
+				class="border border-gray-200 rounded-md px-2 py-1 text-sm text-gray-700 focus:outline-none focus:ring-1 focus:ring-blue-400 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
+				aria-label="Due date"
+			/>
 			<input
 				type="number"
 				min="0"
 				bind:value={form.storyPoints}
-				class="border rounded px-2 py-1"
+				class="border border-gray-200 rounded-md px-2 py-1 text-sm text-gray-700 focus:outline-none focus:ring-1 focus:ring-blue-400 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
 				aria-label="Story points"
 			/>
-			<select bind:value={form.priority} class="border rounded px-2 py-1" aria-label="Priority">
-				<option>Low</option>
-				<option>Medium</option>
-				<option>High</option>
+			<select
+				bind:value={form.priority}
+				class="border border-gray-200 rounded-md px-2 py-1 text-sm text-gray-700 focus:outline-none focus:ring-1 focus:ring-blue-400 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
+				aria-label="Priority"
+			>
+				<option value="Low">Low</option>
+				<option value="Medium">Medium</option>
+				<option value="High">High</option>
 			</select>
 		</div>
 	</div>
 	<div class="flex justify-end gap-2 mt-4">
-		<button on:click={handleClose} class="px-3 py-1 border rounded hover:bg-gray-100"> Cancel </button>
+		<button
+			onclick={handleClose}
+			class="px-3 py-1 text-sm text-gray-600 hover:text-gray-800 dark:text-gray-300 dark:hover:text-gray-100 focus:outline-none focus:ring-1 focus:ring-gray-400 dark:focus:ring-gray-500"
+		>
+			Cancel
+		</button>
 		{#if issue}
-			<button on:click={submitUpdate} class="px-3 py-1 bg-yellow-500 text-white rounded hover:bg-yellow-600">
+			<button
+				onclick={submitUpdate}
+				class="px-3 py-1 text-sm bg-yellow-400 text-white rounded-md hover:bg-yellow-500 focus:outline-none focus:ring-1 focus:ring-yellow-400 dark:bg-yellow-500 dark:hover:bg-yellow-600"
+			>
 				Update
 			</button>
 		{:else}
-			<button on:click={submitCreate} class="px-3 py-1 bg-green-600 text-white rounded hover:bg-green-600">
+			<button
+				onclick={submitCreate}
+				class="px-3 py-1 text-sm bg-green-400 text-white rounded-md hover:bg-green-500 focus:outline-none focus:ring-1 focus:ring-green-400 dark:bg-green-500 dark:hover:bg-green-600"
+			>
 				Create
 			</button>
 		{/if}

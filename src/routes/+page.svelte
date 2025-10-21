@@ -180,9 +180,9 @@
 		}
 	}
 </script>
-
-<Header onnew={openCreate} onexportcsv={exportCSV} />
-<main class="p-6 overflow-auto">
+<div class="dark:bg-gray-800">	
+<Header  onnew={openCreate} onexportcsv={exportCSV} />
+<main class=" p-6 overflow-auto">
 	<div class="flex gap-4">
 		{#each lanes as lane}
 			<Lane
@@ -209,3 +209,5 @@
 		editingIssue = null;
 	}}
 />
+
+</div>
