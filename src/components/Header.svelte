@@ -34,7 +34,7 @@
 >
 	<div class="max-w-7xl mx-auto flex justify-between items-center">
 		<h1 class="text-lg font-medium text-gray-900 dark:text-gray-100">
-			Kanban Board
+			K A N B A N Board
 		</h1>
 		<div class="flex gap-2 items-center">
 			<div
