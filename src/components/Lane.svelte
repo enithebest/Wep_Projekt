@@ -16,7 +16,7 @@
 
   function handleDrop(e) {
     e.preventDefault();
-    onDrop(lane.id, e);
+    onDrop(e);
   }
 </script>
 
@@ -28,9 +28,9 @@
 >
   <div class="flex justify-between items-center mb-4">
     <h2 class="text-lg font-semibold">{lane.title}</h2>
-    <span class="text-sm text-gray-500"
-      >SP: {issues.reduce((s, i) => s + Number(i.storyPoints || 0), 0)}</span
-    >
+    <span class="text-sm text-gray-500">
+      SP: {issues.reduce((s, i) => s + Number(i.storyPoints || 0), 0)}
+    </span>
   </div>
 
   {#each issues as issue (issue.id)}

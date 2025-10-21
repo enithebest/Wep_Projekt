@@ -191,16 +191,16 @@
 <main class="p-6 overflow-auto">
   <div class="flex gap-4">
     {#each lanes as lane}
-      <Lane
-        {lane}
-        issues={issues.filter(i => i.laneId === lane.id)}
-        onDrop={(e) => onDrop(lane.id, e.detail ? e.detail.event : e)}
-        onDragStart={(e) => onDragStart(e.detail || e)}
-        onEdit={(e) => onEdit(e.detail)}
-        onDelete={(e) => onDelete(e.detail)}
-        onShare={(e) => onShare(e.detail)}
-        onExportICS={(e) => exportIssueICS(e.detail)}
-      />
+  <Lane
+    {lane}
+    issues={issues.filter(i => i.laneId === lane.id)}
+    onDrop={(e) => onDrop(lane.id, e)}
+    onDragStart={(e) => onDragStart(e.detail || e)}
+    onEdit={(e) => onEdit(e.detail)}
+    onDelete={(e) => onDelete(e.detail)}
+    onShare={(e) => onShare(e.detail)}
+    onExportICS={(e) => exportIssueICS(e.detail)}
+  />
     {/each}
   </div>
 </main>
