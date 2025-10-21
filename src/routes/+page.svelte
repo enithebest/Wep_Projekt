@@ -186,7 +186,7 @@
   }
 </script>
 
-<Header onnew={openCreate} onexportcsv={exportCSV} />
+<Header on:new={openCreate} on:exportcsv={exportCSV} />
 
 <main class="p-6 overflow-auto">
   <div class="flex gap-4">
@@ -209,14 +209,15 @@
   bind:open={dialogOpen}
   {editingIssue}
   issue={editingIssue}
-  oncreate={(e) => onCreate(e)}
-  onupdate={(e) => onUpdate(e)}
-  onclose={() => {
+  on:create={(e) => onCreate(e)}
+  on:update={(e) => onUpdate(e)}
+  on:close={() => {
     console.log('+page: IssueDialog onclose triggered');
     dialogOpen = false;
     editingIssue = null;
   }}
 />
+
 
 <style>
   :global(body) {

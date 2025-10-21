@@ -36,11 +36,11 @@
   {#each issues as issue (issue.id)}
     <IssueCard
       {issue}
-      onedit={() => onEdit(issue)}
-      ondelete={(e) => onDelete(e.detail)}
-      onshare={(e) => onShare(e.detail)}
-      onexportics={(e) => onExportICS(e.detail)}
-      ondragstart={(e) => onDragStart(e.detail || e)}
+      on:edit={() => onEdit(issue)}
+      on:delete={(e) => onDelete(e.detail)}
+      on:share={(e) => onShare(e.detail)}
+      on:exportics={(e) => onExportICS(e.detail)}
+      on:dragstart={(e) => onDragStart(e.detail || e)}
     />
   {/each}
 </section>
