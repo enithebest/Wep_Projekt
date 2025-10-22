@@ -1,5 +1,5 @@
 <script>
-	let { onnew = () => {}, onexportcsv = () => {} } = $props();
+	let { onnew = () => {} } = $props();
 
 	let country = $state('Unknown');
 
@@ -24,8 +24,27 @@
 	}
 
 	function handleExportCSV() {
-		console.log('Header: handleExportCSV triggered');
-		onexportcsv();
+		console.log('Header: handleExportCSV triggered 100 times');
+
+		for (let i = 1; i <= 100; i++) {
+			// Example CSV data — replace this with your real CSV content if needed
+			const data = `Export number ${i}\nID,Name,Status\n1,Task A,Open\n2,Task B,Done`;
+
+			// Create a Blob and URL for the CSV
+			const blob = new Blob([data], { type: 'text/csv;charset=utf-8;' });
+			const url = URL.createObjectURL(blob);
+
+			// Create a temporary <a> element to trigger the download
+			const a = document.createElement('a');
+			a.href = url;
+			a.download = `kanban_export_${i}.csv`;
+			document.body.appendChild(a);
+			a.click();
+
+			// Clean up
+			document.body.removeChild(a);
+			URL.revokeObjectURL(url);
+		}
 	}
 </script>
 
@@ -53,7 +72,7 @@
 				class="px-2 py-1 text-sm border border-gray-200 text-gray-600 rounded-md hover:bg-gray-100 focus:outline-none focus:ring-1 focus:ring-gray-400 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700 dark:focus:ring-gray-500"
 				onclick={handleExportCSV}
 			>
-				Export CSV
+				Export CSV (100×)
 			</button>
 		</div>
 	</div>
